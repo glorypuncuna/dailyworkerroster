@@ -1,0 +1,472 @@
+definitions:
+  model.ListShiftDetail:
+    properties:
+      name:
+        type: string
+      shift_details:
+        items:
+          $ref: '#/definitions/model.WorkerShiftDetail'
+        type: array
+      user_account_id:
+        type: integer
+    type: object
+  model.Shift:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      isAvailable:
+        type: boolean
+      location:
+        type: string
+      role_assignment:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.ShiftStatus:
+    properties:
+      date:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      isAvailable:
+        type: boolean
+      location:
+        type: string
+      role_assignment:
+        type: string
+      start_time:
+        type: string
+      status_worker:
+        type: string
+    type: object
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      jwt_token:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        description: ADMIN, WORKER
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  model.WorkerShiftDetail:
+    properties:
+      approved_by:
+        description: nullable
+        type: integer
+      date:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      isAvailable:
+        type: boolean
+      location:
+        type: string
+      role_assignment:
+        type: string
+      shift_id:
+        type: integer
+      start_time:
+        type: string
+      status:
+        description: PENDING, APPROVED, REJECTED
+        type: string
+      user_account_id:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /admin/shift:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Shift
+        in: body
+        name: shift
+        required: true
+        schema:
+          $ref: '#/definitions/model.Shift'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new shift
+      tags:
+      - shifts
+  /admin/shift/{shiftID}/approve/{workerID}:
+    put:
+      parameters:
+      - description: Shift ID
+        in: path
+        name: shiftID
+        required: true
+        type: integer
+      - description: Worker ID
+        in: path
+        name: workerID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Approve a shift request for a worker
+      tags:
+      - shifts
+  /admin/shift/{shiftID}/reject/{workerID}:
+    put:
+      parameters:
+      - description: Shift ID
+        in: path
+        name: shiftID
+        required: true
+        type: integer
+      - description: Worker ID
+        in: path
+        name: workerID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reject a shift request for a worker
+      tags:
+      - shifts
+  /admin/shifts/day:
+    get:
+      parameters:
+      - description: Date (YYYY-MM-DD)
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ShiftStatus'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all shifts by date
+      tags:
+      - shifts
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          properties:
+            identifier:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - users
+  /shift/{shiftID}/request/{workerID}:
+    post:
+      parameters:
+      - description: Shift ID
+        in: path
+        name: shiftID
+        required: true
+        type: integer
+      - description: Worker ID
+        in: path
+        name: workerID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Request a shift for a worker
+      tags:
+      - shifts
+  /signup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - users
+  /worker/{id}:
+    get:
+      parameters:
+      - description: Worker ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get worker by ID
+      tags:
+      - users
+  /worker/{workerID}/available:
+    get:
+      parameters:
+      - description: Worker ID
+        in: path
+        name: workerID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ShiftStatus'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get available shifts for a worker
+      tags:
+      - shifts
+  /worker/{workerID}/requests:
+    get:
+      parameters:
+      - description: Worker ID
+        in: path
+        name: workerID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ShiftStatus'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all requested shifts for a worker
+      tags:
+      - shifts
+  /worker/assigned:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ListShiftDetail'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get assigned shifts for the current user
+      tags:
+      - shifts
+  /workers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all workers
+      tags:
+      - users
+swagger: "2.0"
